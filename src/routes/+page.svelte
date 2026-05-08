@@ -1,34 +1,5 @@
 <script lang="ts">
-  import Hls from 'hls.js';
-
-  let videoElement = $state<HTMLVideoElement | undefined>();
-  const streamUrl = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
-
-  $effect(() => {
-    if (!videoElement) return;
-
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(streamUrl);
-      hls.attachMedia(videoElement);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        videoElement?.play();
-      });
-
-      return () => {
-        hls.destroy();
-      };
-    } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-      // Soporte nativo (Safari, algunas Smart TVs modernas)
-      videoElement.src = streamUrl;
-      const onLoaded = () => videoElement?.play();
-      videoElement.addEventListener('loadedmetadata', onLoaded);
-
-      return () => {
-        videoElement?.removeEventListener('loadedmetadata', onLoaded);
-      };
-    }
-  });
+  const embedUrl = 'http://192.168.100.208:5174/';
 </script>
 
 <div class="tv-container">
@@ -37,14 +8,11 @@
   </header>
 
   <main class="video-wrapper">
-    <video
-      bind:this={videoElement}
-      autoplay
-      muted
-      playsinline
-      loop
-      class="video-player"
-    ></video>
+    <iframe
+      src={embedUrl}
+      title="Embedded app"
+      class="embed-frame"
+    ></iframe>
   </main>
 
   <footer class="bottom-bar">
@@ -71,16 +39,17 @@
   }
 
   .video-wrapper {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: #ffffff;
   }
 
-  .video-player {
+  .embed-frame {
     width: 75%;
     aspect-ratio: 16 / 9;
-    background: #000;
+    background: #fff;
     box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     border: 1px solid #eee;
