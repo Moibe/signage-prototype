@@ -12,6 +12,10 @@ node_modules
 .DS_Store
 Thumbs.db
 
+# Videos (junctions to local folders, not project content)
+/static/videos
+/static/videos_web
+
 # Env
 .env
 .env.*

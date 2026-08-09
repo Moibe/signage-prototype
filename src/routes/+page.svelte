@@ -1,5 +1,29 @@
 <script lang="ts">
-  const embedUrl = 'http://192.168.100.208:5174/';
+  const videos = ['/videos_web/clip1.mp4', '/videos_web/clip2.mp4'];
+  let current = $state(0);
+  let status = $state('arrancando...');
+  let videoEl: HTMLVideoElement;
+
+  function playCurrent() {
+    status = `cargando ${videos[current]}`;
+    videoEl.src = videos[current];
+    videoEl.load();
+    videoEl
+      .play()
+      .then(() => (status = `reproduciendo ${videos[current]}`))
+      .catch((err) => (status = `play() rechazado en ${videos[current]}: ${err.name}: ${err.message}`));
+  }
+
+  function next() {
+    current = (current + 1) % videos.length;
+    playCurrent();
+  }
+
+  function onError() {
+    const err = videoEl.error;
+    status = `error en ${videos[current]}: code ${err?.code} ${err?.message ?? ''}`;
+    next();
+  }
 </script>
 
 <div class="tv-container">
@@ -8,15 +32,22 @@
   </header>
 
   <main class="video-wrapper">
-    <iframe
-      src={embedUrl}
-      title="Embedded app"
+    <video
+      bind:this={videoEl}
+      src={videos[0]}
       class="embed-frame"
-    ></iframe>
+      autoplay
+      muted
+      playsinline
+      controls
+      onended={next}
+      onerror={onError}
+      onplaying={() => (status = `reproduciendo ${videos[current]}`)}
+    ></video>
   </main>
 
   <footer class="bottom-bar">
-    <div class="placeholder-ticker">Esperando datos de FastAPI...</div>
+    <div class="placeholder-ticker">{status}</div>
   </footer>
 </div>
 
@@ -47,12 +78,14 @@
   }
 
   .embed-frame {
-    width: 75%;
-    aspect-ratio: 16 / 9;
-    background: #fff;
-    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    border: 1px solid #eee;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
+  }
+
+  :global(.embed-frame::-webkit-media-controls-panel) {
+    opacity: 1 !important;
   }
 
   .top-bar,
